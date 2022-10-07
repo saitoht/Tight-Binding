@@ -2,4 +2,5 @@
 python setup.py build_ext --inplace
 
 # Usage
-python TBband.py <it>foobar</it>
+python TBband.py {foobar}
+
