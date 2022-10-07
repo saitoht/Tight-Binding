@@ -4,3 +4,6 @@ python setup.py build_ext --inplace
 # Usage
 python TBband.py {foobar}
 
+# Requirement
+Numpy, Cython etc.
+
