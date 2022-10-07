@@ -224,8 +224,8 @@ def main(foobar, fn):
 
     ### Plotting
     plt.rcParams['font.family'] = 'Helvetica'
-    plt.rcParams["xtick.labelsize"]=15.0
-    plt.rcParams["ytick.labelsize"]=15.0
+    plt.rcParams["xtick.labelsize"]=12.0
+    plt.rcParams["ytick.labelsize"]=12.0
     plt.rcParams["xtick.major.pad"] = 5
     plt.rcParams["ytick.major.pad"] = 5
     plt.rcParams["axes.labelsize"] = 18.0
@@ -268,7 +268,7 @@ def main(foobar, fn):
         ax.plot(xlist,ylist_dn,c='black',lw=1.)
         ax.plot([ksn[0],ksn[len(ksn)-1]], [0., 0.], color="gray", lw=0.5, ls='dashed')
         for i in range(len(ksn)):
-            ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="black", lw=0.5, ls='dashed')
+            ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="gray", lw=0.5, ls='dashed')
         plt.xticks(ksn, kpath)
         figd.savefig("TBband_dn.pdf")
         plt.show()
@@ -278,7 +278,7 @@ def main(foobar, fn):
         ax.plot(xlist,ylist,c='black',lw=1.)
         ax.plot([ksn[0],ksn[len(ksn)-1]], [0., 0.], color="gray", lw=0.5, ls='dashed')
         for i in range(len(ksn)):
-            ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="black", lw=0.5, ls='dashed')
+            ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="gray", lw=0.5, ls='dashed')
         plt.xticks(ksn, kpath)
         figu.savefig("TBband.pdf")
         plt.show()
