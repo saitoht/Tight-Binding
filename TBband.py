@@ -255,7 +255,7 @@ def main(foobar, fn):
         figu = plt.figure()
         ax = figu.add_subplot(111,xlabel=xlab, ylabel=ylab, title=tit+' Majority',xlim=(ksn[0],ksn[len(ksn)-1]),ylim=(ylimmin,ylimmax))
         ax.plot(xlist,ylist_up,c='black',lw=1.)
-        ax.plot([:,:], [0., 0.], color="gray", lw=0.5, ls='dashed')
+        ax.plot([ksn[0],ksn[len(ksn)-1]], [0., 0.], color="gray", lw=0.5, ls='dashed')
         for i in range(len(ksn)):
             ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="gray", lw=0.5, ls='dashed')
         plt.xticks(ksn, kpath)
@@ -266,7 +266,7 @@ def main(foobar, fn):
         figd = plt.figure()
         ax = figd.add_subplot(111,xlabel=xlab, ylabel=ylab, title=tit+' Minority',xlim=(ksn[0],ksn[len(ksn)-1]),ylim=(ylimmin,ylimmax))
         ax.plot(xlist,ylist_dn,c='black',lw=1.)
-        ax.plot([:,:], [0., 0.], color="gray", lw=0.5, ls='dashed')
+        ax.plot([ksn[0],ksn[len(ksn)-1]], [0., 0.], color="gray", lw=0.5, ls='dashed')
         for i in range(len(ksn)):
             ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="black", lw=0.5, ls='dashed')
         plt.xticks(ksn, kpath)
@@ -276,7 +276,7 @@ def main(foobar, fn):
         fig = plt.figure()
         ax = fig.add_subplot(111,xlabel=xlab, ylabel=ylab, title=tit ,xlim=(ksn[0],ksn[len(ksn)-1]),ylim=(ylimmin,ylimmax))
         ax.plot(xlist,ylist,c='black',lw=1.)
-        ax.plot([:,:], [0., 0.], color="gray", lw=0.5, ls='dashed')
+        ax.plot([ksn[0],ksn[len(ksn)-1]], [0., 0.], color="gray", lw=0.5, ls='dashed')
         for i in range(len(ksn)):
             ax.plot([ksn[i], ksn[i]], [ylimmin, ylimmax], color="black", lw=0.5, ls='dashed')
         plt.xticks(ksn, kpath)
