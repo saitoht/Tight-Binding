@@ -9,7 +9,7 @@ import get_ham
 wfi0 = 6
 wfe0 = 23
 var0 = -2
-nelecu = 23 # number of majority electrons
+nelecu = 21 # number of majority electrons
 nelecd = 19 # number of minority electrons
 nwf = 23 # number of wannier orbitals: e.g. d+6p => 23
 sw_red = False # e.g. consider onsite 2p contribution reduction or not
@@ -86,13 +86,15 @@ def get_syml(foobar):
             ke0[i,j] = float(frac0[i,j+4])
     return(klen0, ks0, ke0, ksname0, kename0)
 
-def mk_k(ks,ke,ksn,klen):
+def mk_k(ks,ke,ksn,klen,klenmx):
     """ make k point mesh for calculation """
     kdif = np.array(ke)-np.array(ks)
     kd_norm = 2.*np.pi*np.sqrt(np.dot(kdif, kdif))
     kvarr = [[],[],[]]
     for i in range(3):
         kvarr[i] = (np.linspace(2.*np.pi*ks[i], 2.*np.pi*ke[i], int(klen))).tolist()
+        add = np.zeros(klenmx-klen).tolist()
+        kvarr[i].extend(add)
     karr = np.linspace(ksn,ksn+kd_norm,int(klen)).tolist()
     kvarrT = np.array(kvarr).T
     return(kvarrT,karr,ksn+kd_norm)
@@ -116,7 +118,6 @@ def calc_chemical_potential(eigu, eigd, neu, ned, sw_semi):
 def reduce_onsite(hopu, hopd, wfi, wfe, var):
     """ reduce the onsite components of matrix elements """
     rlen = nwf*nwf
-    print("-------------------------------------------")
     print("Reduced onsite: ")
     for m in range(wfi-1, wfe):
         hopu[0,m,m] = hopu[0,m,m] + var
@@ -140,9 +141,10 @@ def main(foobar, fn):
     karr = np.zeros(len(klen)).tolist()
     ksn = np.zeros(len(klen)).tolist()
     ksn0 = np.dot(ks[0], ks[0])
-    (kvarrT[0],karr[0],ksn[0])=mk_k(ks[0],ke[0],ksn0,klen[0])
+    klenmax = max(klen)
+    (kvarrT[0],karr[0],ksn[0])=mk_k(ks[0],ke[0],ksn0,klen[0],klenmax)
     for i in range(1,len(klen)):
-        (kvarrT[i],karr[i],ksn[i])=mk_k(ks[i],ke[i],ksn[i-1],klen[i])
+        (kvarrT[i],karr[i],ksn[i])=mk_k(ks[i],ke[i],ksn[i-1],klen[i],klenmax)
     klen_all = sum(klen)
     if sw_spn:
         eig_up = np.zeros((klen_all,nwf))
