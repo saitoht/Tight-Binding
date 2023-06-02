@@ -1,8 +1,12 @@
 # How to compile get_ham.pyx
-python setup.py build_ext --inplace
+```shell-session
+$ python setup.py build_ext --inplace
+```
 
 # Usage
-python TBband.py {foobar}
+```shell-session
+$ python TBband.py {foobar}
+```
 
 # Requirement
 Numpy, Cython etc.
