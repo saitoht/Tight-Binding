@@ -1,5 +1,5 @@
 !!! Tight Binding Modeling !!!
-!!! H. Saito 2023/
+!!! H. Saito 2023/6/21
 module m_TB
   use m_read_prms, only: nwf, nal, hop_up, hop_dn, sw_spn, sw_shift_ef, &
        site, VBZ, qlat, nkpdiv, kpi, kpf
@@ -13,10 +13,10 @@ module m_TB
 
 contains
 !!! *************************************************************************
-  subroutine mk_kline( ki, kf, ndiv, kpline, kpline_vec )
+  subroutine mk_kline( ki, kf, kn, ndiv, kpline, kpline_vec )
     !!! generate k-point line for band calculation !!!
     implicit none
-    real(8), intent(in) :: ki(1:3), kf(1:3)
+    real(8), intent(in) :: ki(1:3), kf(1:3), kn
     real(8) :: kd(1:3)
     real(8), intent(out) :: kpline(1:ndiv), kpline_vec(1:ndiv,1:3)
     real(8) :: kd_norm, ki_norm, kf_norm
@@ -35,7 +35,7 @@ contains
        do j = 1, 3
           kpline_vec(i+1,j) = 2.0d0*pi*ki(j) + 2.0d0*pi*((kf(j)-ki(j))*dble(i))/dble(ndiv)
        end do
-       kpline(i+1) = ki_norm + ((kf_norm-ki_norm)*dble(i))/dble(ndiv)
+       kpline(i+1) = kn + ((kf_norm-ki_norm)*dble(i))/dble(ndiv)
     end do
   end subroutine mk_kline
 
@@ -91,10 +91,10 @@ contains
     do i = 1, size(nkpdiv(:))
        countj = 0
        if ( i == 1 ) then
-          call mk_kline( kpi(i,:), kpf(i,:), nkpdiv(i), kplin(1:sum(nkpdiv(:i))+1), kplinv(1:sum(nkpdiv(:i))+1,:) )
+          call mk_kline( kpi(i,:), kpf(i,:), 0.0d0, nkpdiv(i), kplin(1:sum(nkpdiv(:i))), kplinv(1:sum(nkpdiv(:i)),:) )
        else
-          call mk_kline( kpi(i,:), kpf(i,:), nkpdiv(i), kplin(sum(nkpdiv(:i-1)):sum(nkpdiv(:i))+1), &
-               kplinv(sum(nkpdiv(:i-1)):sum(nkpdiv(:i))+1,:) )
+          call mk_kline( kpi(i,:), kpf(i,:), kplin(count), nkpdiv(i), kplin(sum(nkpdiv(:i-1))+1:sum(nkpdiv(:i))), &
+               kplinv(sum(nkpdiv(:i-1))+1:sum(nkpdiv(:i)),:) )
        end if
        do j = 1, nkpdiv(i)
           if ( ( counti .ne. 0 ) .and. ( countj == 0 ) ) then
@@ -104,6 +104,7 @@ contains
              end if
              go to 10
           end if
+          print *, kplin(count+1)
           call init_TBham(kplinv(count+1,:), hop_up(:,:,:), hamk_up(count+1,:,:))
           call diag_ham(nwf, hamk_up(count+1,:,:), eigu(count+1,:))
           if ( sw_spn == 2 ) then ! up and dn
