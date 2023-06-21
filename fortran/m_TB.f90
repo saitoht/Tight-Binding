@@ -18,7 +18,7 @@ contains
     implicit none
     real(8), intent(in) :: ki(1:3), kf(1:3), kn
     real(8) :: kd(1:3)
-    real(8), intent(out) :: kpline(1:ndiv), kpline_vec(1:ndiv,1:3)
+    real(8), intent(out) :: kpline(1:ndiv+1), kpline_vec(1:ndiv+1,1:3)
     real(8) :: kd_norm, ki_norm, kf_norm
     integer(4), intent(in) :: ndiv
     integer(4) :: i, j
@@ -31,11 +31,11 @@ contains
     kf_norm = 2.0d0 * pi * sqrt( dot_product(kf, kf) )
     kd_norm = 2.0d0 * pi * sqrt( dot_product(kd, kd) )
     kf_norm = ki_norm + kd_norm
-    do i = 0, ndiv-1
+    do i = 1, ndiv+1
        do j = 1, 3
-          kpline_vec(i+1,j) = 2.0d0*pi*ki(j) + 2.0d0*pi*((kf(j)-ki(j))*dble(i))/dble(ndiv)
+          kpline_vec(i,j) = 2.0d0*pi*ki(j) + 2.0d0*pi*((kf(j)-ki(j))*dble(i-1))/dble(ndiv)
        end do
-       kpline(i+1) = kn + ((kf_norm-ki_norm)*dble(i))/dble(ndiv)
+       kpline(i) = kn + (dabs(kf_norm-ki_norm)*dble(i-1))/dble(ndiv)
     end do
   end subroutine mk_kline
 
@@ -76,14 +76,15 @@ contains
     integer(4) :: i, j, k, count, counti, countj
     
     if ( .not. allocated(eigu) ) then
-       allocate(eigu(1:sum(nkpdiv(:)), 1:nwf))
-       allocate(eigd(1:sum(nkpdiv(:)), 1:nwf))
-       allocate(hamk_up(1:sum(nkpdiv(:)), 1:nwf, 1:nwf))
-       allocate(hamk_dn(1:sum(nkpdiv(:)), 1:nwf, 1:nwf))
-       allocate(kplin(1:sum(nkpdiv(:))))
-       allocate(kplinv(1:sum(nkpdiv(:)),1:3))
-       allocate(uni(1:sum(nkpdiv(:)),1:nwf))
+       allocate(eigu(1:sum(nkpdiv(:))+size(nkpdiv(:)), 1:nwf))
+       allocate(eigd(1:sum(nkpdiv(:))+size(nkpdiv(:)), 1:nwf))
+       allocate(hamk_up(1:sum(nkpdiv(:))+size(nkpdiv(:)), 1:nwf, 1:nwf))
+       allocate(hamk_dn(1:sum(nkpdiv(:))+size(nkpdiv(:)), 1:nwf, 1:nwf))
+       allocate(kplin(1:sum(nkpdiv(:))+size(nkpdiv(:))))
+       allocate(kplinv(1:sum(nkpdiv(:))+size(nkpdiv(:)),1:3))
+       allocate(uni(1:sum(nkpdiv(:))+size(nkpdiv(:)),1:nwf))
     end if
+    print *, sum(nkpdiv(:))+size(nkpdiv(:))
 
     count = 0
     counti = 0
@@ -91,20 +92,14 @@ contains
     do i = 1, size(nkpdiv(:))
        countj = 0
        if ( i == 1 ) then
-          call mk_kline( kpi(i,:), kpf(i,:), 0.0d0, nkpdiv(i), kplin(1:sum(nkpdiv(:i))), kplinv(1:sum(nkpdiv(:i)),:) )
+          call mk_kline( kpi(i,:), kpf(i,:), 0.0d0, nkpdiv(i), kplin(1:nkpdiv(i)+1), kplinv(1:nkpdiv(i)+1,:) )
        else
-          call mk_kline( kpi(i,:), kpf(i,:), kplin(count), nkpdiv(i), kplin(sum(nkpdiv(:i-1))+1:sum(nkpdiv(:i))), &
-               kplinv(sum(nkpdiv(:i-1))+1:sum(nkpdiv(:i)),:) )
+          call mk_kline( kpi(i,:), kpf(i,:), kplin(sum(nkpdiv(:i-1))+i-1), nkpdiv(i), &
+               kplin(sum(nkpdiv(:i-1))+i:sum(nkpdiv(:i))+i), &
+               kplinv(sum(nkpdiv(:i-1))+i:sum(nkpdiv(:i))+i,:) )
        end if
-       do j = 1, nkpdiv(i)
-          if ( ( counti .ne. 0 ) .and. ( countj == 0 ) ) then
-             eigu(count+1,:) = eigu(count,:)
-             if ( sw_spn == 2 ) then
-                eigd(count+1,:) = eigd(count,:)
-             end if
-             go to 10
-          end if
-          print *, kplin(count+1)
+       do j = 1, nkpdiv(i)+1
+          print *, count+1, kplin(count+1)
           call init_TBham(kplinv(count+1,:), hop_up(:,:,:), hamk_up(count+1,:,:))
           call diag_ham(nwf, hamk_up(count+1,:,:), eigu(count+1,:))
           if ( sw_spn == 2 ) then ! up and dn
@@ -112,7 +107,7 @@ contains
              call diag_ham(nwf, hamk_dn(count+1,:,:), eigd(count+1,:))
              !!! include SOC mode in the future
           end if
-10        count = count + 1
+          count = count + 1
           countj = countj + 1
        end do
        counti = counti + 1
@@ -139,7 +134,7 @@ contains
           write(11,*) '### index   kpoint   eigu(k)(eV) ###'
        end if
        do j = 1, nwf
-          do k = 1, nkpdiv(i)
+          do k = 1, nkpdiv(i)+1
              if ( sw_spn == 2 ) then
                 write(11,*) j, kplin(count+k), eigu(count+k,j), eigd(count+k,j)
              else
@@ -148,7 +143,7 @@ contains
           end do
           write(11,*) ''
        end do
-       count = count + nkpdiv(i)
+       count = count + nkpdiv(i) + 1
        close(11)
     end do
     call save_DOS()
