@@ -1,5 +1,6 @@
 !!! Read parameters for simulation !!!
 ! H. Saito 2023/6/17
+! 
 ! sw_spn: consider spin down or not
 ! sw_shift_ef: consider the shift of Fermi energy or not
 ! nsite: number of sites
@@ -10,6 +11,7 @@
 ! site: atomic sites
 ! hop_up/dn: hopping matrix of up/down spin 
 ! temp: temperature (K)
+
 module m_read_prms
   implicit none
   character(100), protected, save :: foobar
@@ -80,6 +82,7 @@ contains
     do i = 1, 3
        print *, qlat(i,:)
     end do
+    print *, 'BZ volume:', VBZ
     do i = 1, size(ele)
        print *, 'Element', i, ':', ele(i)
     end do
@@ -153,7 +156,7 @@ contains
   subroutine get_syml()
     !!! get symmetry line from syml.foobar !!!
     implicit none
-    integer(4) :: n, count, ios
+    integer(4) :: i, n, count, ios
     character(150) :: line, tline
     
     n = 1
@@ -181,6 +184,16 @@ contains
        count = count + 1
     end do
     close(12)
+
+    ! check input parameters
+    print *, '***** READ PARAMETERS *****'
+    print *, 'Division number of kpaths:', nkpdiv(:)
+    do i = 1, size(kpi(:,1))
+       print *, 'Initial k-point mesh:', i, kpi(i,:)
+       print *, 'Final k-point mesh:', i, kpf(i,:)
+       print *, 'Name of initial k-point:', kpiname(i)
+       print *, 'Name of final k-point:', kpfname(i)
+    end do
   end subroutine get_syml
 
 !!! *************************************************************************
